@@ -7,7 +7,3 @@ The analysis is split into three parts, each having it's own notebook:
 - Data cleaning and basic feature extraction (in data_cleaning.ipynb)
 - Exploratory data analysis (in eda.ipynb)
 - Modelling and analysis (in analysis.ipynb)
-
-Following the analysis, I made a shiny timer app, which implements some of the training strategies which seem to be effective (from both the analysis above, and the general cencus of climbers).
-
-The app is based mostly around hangboard training strategies (which is most of what I have available during the current Covid-19 pandemic). After each excercise, the user can input their results (weight and time), which is automatically added to a google sheets, so people can track their progress.
