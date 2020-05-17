@@ -1,0 +1,9 @@
+{
+    "path" : "~/miscellaneous/hangboard_timer",
+    "sortOrder" : [
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        }
+    ]
+}
