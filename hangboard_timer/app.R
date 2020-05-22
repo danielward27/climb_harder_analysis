@@ -26,7 +26,7 @@ tracked_exercises = choices = c("Front Lever", "Front Three",
                                 "Front Three", "Half Crimp",
                                 "Half Crimp", "Pinch Block")
 
-bh = 20 # Time between left and right hangs
+bh = 30 # Time between left and right hangs
 hand = c("B", "B", rep(c("R", "L", "L", "R"), 2), "B", rep(c("L", "R", "R", "L"), 2), "B", "B", "B")
 hand[hand == "B"] <- "Both"
 hand[hand == "L"] <- "Left"
@@ -52,17 +52,16 @@ ui <- fluidPage(
       tabsetPanel(type = "tabs",
                   tabPanel("Record results",
                            br(),
-                           numericInput("bodyweight", "Bodyweight / kg", value=0, min=0, max=200, step=0.5),
+                           numericInput("bodyweight", "Bodyweight / kg", value=NA, min=0, max=200, step=0.5),
                            selectInput("record_ex", label="Exercise",
-                                       choices = tracked_exercises),
+                                       choices = tracked_exercises, selected = "Front Lever"),
                            radioButtons("record_hand", label="Hand",
-                                        choices = c("Left", "Right","Both"),
+                                        choices = c("Left", "Right","Both"), selected = "Both",
                                         inline = TRUE),
-
                            numericInput('record_time', 'Time / s:',
-                                        value=0, min=0, max=10, step=0.5),
+                                        value=NA, min=0, step=0.5),
                            numericInput('record_weight', 'Weight / kg:',
-                                        value=0, min=-100, max=100, step=0.5),
+                                        value=NA, step=0.5),
                            actionButton("submit", "Submit")
                   ),
                   
@@ -84,7 +83,7 @@ ui <- fluidPage(
                   tabPanel("Settings",
                            br(),
                            sliderInput('interval', label = "Time between exercises / s:",
-                                        round = TRUE, value=240, min=20, max=400, step=10)
+                                        round = TRUE, value=240, min=40, max=440, step=10)
                            )
                   )
       )
@@ -116,7 +115,6 @@ server <- function(input, output, session) {
   
   # Add timings as reactive (user can choose exercise interval)
   observe({
-    bh = 20
     i = input$interval
     rv$ex_df$timings <- c(10, i, i, rep(c(bh, i-bh), 4),
                           i, rep(c(bh, i-bh), 4), i, 10)})
@@ -163,7 +161,7 @@ server <- function(input, output, session) {
         ggplot(aes(date, weight, color = hand, size=time)) +
         geom_point(alpha=0.6) +
         scale_color_manual(values=colours) +
-        scale_size("weight", range = c(1,5))
+        scale_size("time", range = c(1,5))
     }
     p
   })
@@ -182,16 +180,14 @@ server <- function(input, output, session) {
     invalidateLater(1000, session)
     isolate({
       if(active()){
-        
-        timer(timer()-1)
+        timer(timer()-1) # Countdown
         
         # Add 5 beep coundown to hang
         if (timer()<=5 & timer()>0){
           beep(sound = 10)   # 5 beeps to countdown to hang.
-        }
-        
+        }        
         # When timer is zero
-        else if (timer()==0){
+        if (timer()==0){
           beep(sound = 1)
           counter(counter()+1)
           timer(rv$ex_df$timings[counter()])
@@ -204,16 +200,21 @@ server <- function(input, output, session) {
             active(FALSE)
             showModal(modalDialog(
               title = "Workout Completed!",
-              "Countdown completed!"))
+              "Workout completed!"))
           }
-        } else if (timer() > (rv$ex_df$timings[counter()+1]-11)){ 
-            beep(sound = 2)  # Beeps to count hangtime
-          }
+        } 
+        else if (counter() > 1 & timer() > (rv$ex_df$timings[counter()]-11)){ 
+          beep(sound = 2)  # Beeps to count hangtime
         }
+        
       }
-    )
-  })
+    })
+
+    
+        }
+  )
   
 }
 
 shinyApp(ui, server)
+
